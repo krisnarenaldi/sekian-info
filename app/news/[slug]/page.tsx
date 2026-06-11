@@ -17,6 +17,7 @@ import type { Metadata } from 'next'
 import { validateSlug } from '@/lib/utils/slug'
 import { getDailyDigestBySlug } from '@/lib/supabase/queries/daily-digest'
 import Header from '../../components/layout/Header'
+import Footer from '../../components/layout/Footer'
 import CardSkeleton from '../../components/shared/CardSkeleton'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -42,13 +43,13 @@ function ArticleLoadingFallback() {
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-4">
       {/* Back link placeholder */}
-      <div className="h-5 w-32 bg-gray-200 rounded animate-pulse" />
+      <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
 
-      <div className="bg-white rounded-xl shadow-md p-8 space-y-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 space-y-6">
         {/* Title skeleton */}
         <div className="space-y-3">
-          <div className="h-8 bg-gray-200 rounded w-3/4 animate-pulse" />
-          <div className="h-4 bg-gray-200 rounded w-1/4 animate-pulse" />
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4 animate-pulse" />
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 animate-pulse" />
         </div>
 
         {/* Loading indicator with accessible label */}
@@ -56,7 +57,7 @@ function ArticleLoadingFallback() {
         <CardSkeleton label="Memuat poin-poin penting..." />
 
         {/* Button placeholder */}
-        <div className="h-12 w-48 bg-gray-200 rounded-lg animate-pulse" />
+        <div className="h-12 w-48 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
       </div>
     </div>
   )
@@ -108,27 +109,27 @@ async function ArticleDetail({ slug }: { slug: string }) {
     <div className="max-w-4xl mx-auto p-6">
       <Link
         href="/"
-        className="text-blue-600 hover:underline mb-4 inline-block focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+        className="text-blue-600 dark:text-blue-400 hover:underline mb-4 inline-block focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
       >
         &larr; Kembali ke Beranda
       </Link>
 
       <article
-        className="bg-white rounded-xl shadow-md p-8"
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8"
         aria-labelledby="article-title"
       >
         {/* Judul & Sumber */}
         <header className="mb-6">
           <h1
             id="article-title"
-            className="text-3xl font-bold text-gray-800 mb-2 leading-tight"
+            className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2 leading-tight"
           >
             {data.title}
           </h1>
           {data.source_name && (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Sumber:{' '}
-              <span className="font-medium text-gray-600">{data.source_name}</span>
+              <span className="font-medium text-gray-600 dark:text-gray-300">{data.source_name}</span>
             </p>
           )}
         </header>
@@ -139,13 +140,13 @@ async function ArticleDetail({ slug }: { slug: string }) {
           <div
             role="alert"
             aria-live="polite"
-            className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg mb-6"
+            className="p-4 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-900/50 rounded-lg mb-6"
           >
-            <p className="text-yellow-800 font-medium">Ringkasan tidak tersedia</p>
-            <p className="text-yellow-700 text-sm mt-1">
+            <p className="text-yellow-800 dark:text-yellow-200 font-medium">Ringkasan tidak tersedia</p>
+            <p className="text-yellow-700 dark:text-yellow-300 text-sm mt-1">
               Silakan baca salah satu artikel asli di bawah untuk informasi lengkapnya.
             </p>
-            <p className="text-yellow-600 text-xs mt-2">
+            <p className="text-yellow-600 dark:text-yellow-400 text-xs mt-2">
               Maaf, silakan coba lagi. Jika masalah berlanjut, hubungi tim teknis.
             </p>
           </div>
@@ -155,11 +156,11 @@ async function ArticleDetail({ slug }: { slug: string }) {
             <section aria-labelledby="summary-heading" className="mb-6">
               <h2
                 id="summary-heading"
-                className="text-lg font-semibold text-gray-800 mb-3"
+                className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3"
               >
                 Ringkasan
               </h2>
-              <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+              <div className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
                 {data.summary}
               </div>
             </section>
@@ -169,12 +170,12 @@ async function ArticleDetail({ slug }: { slug: string }) {
               <section aria-labelledby="key-points-heading" className="mb-6">
                 <h2
                   id="key-points-heading"
-                  className="text-lg font-semibold text-gray-800 mb-3"
+                  className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3"
                 >
                   Poin Penting
                 </h2>
                 <ul
-                  className="list-disc pl-6 space-y-2 text-gray-700"
+                  className="list-disc pl-6 space-y-2 text-gray-700 dark:text-gray-300"
                   aria-label="Poin-poin penting artikel"
                 >
                   {data.key_points.map((point, idx) => (
@@ -191,7 +192,7 @@ async function ArticleDetail({ slug }: { slug: string }) {
           <section aria-labelledby="sources-heading" className="mb-6">
             <h2
               id="sources-heading"
-              className="text-lg font-semibold text-gray-800 mb-3"
+              className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3"
             >
               Sumber Terkait
             </h2>
@@ -202,7 +203,7 @@ async function ArticleDetail({ slug }: { slug: string }) {
                     href={source.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors text-sm font-medium"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors text-sm font-medium"
                     aria-label={`Baca artikel dari ${source.name}`}
                   >
                     {source.name} ↗
@@ -272,9 +273,9 @@ export default async function NewsDetailPage({ params }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-slate-100 dark:bg-gray-900">
       <Header />
-      <main>
+      <main className="flex-1">
         {/*
           <Suspense> wraps ArticleDetail so Next.js streams the loading fallback
           immediately, then replaces it with the full content once the async
@@ -284,6 +285,7 @@ export default async function NewsDetailPage({ params }: Props) {
           <ArticleDetail slug={slug} />
         </Suspense>
       </main>
+      <Footer />
     </div>
   )
 }
