@@ -1,0 +1,20 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/inspirasi",
+      "schedule": "5 17 * * *"
+    },
+    {
+      "path": "/api/cron/news",
+      "schedule": "0 23 * * *"
+    },
+    {
+      "path": "/api/cron/market",
+      "schedule": "5 23 * * *"
+    },
+    {
+      "path": "/api/cron/ai-news",
+      "schedule": "10 23 * * *"
+    }
+  ]
+}
