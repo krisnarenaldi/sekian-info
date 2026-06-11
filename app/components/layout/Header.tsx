@@ -14,14 +14,24 @@ export default function Header() {
   }
   const today = new Date().toLocaleDateString('id-ID', dateOptions)
 
+  const islamicOptions: Intl.DateTimeFormatOptions = {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    calendar: 'islamic',
+    timeZone: 'Asia/Jakarta',
+  }
+  const islamic = new Date().toLocaleDateString('id-ID', islamicOptions)
+
   return (
     <header className="sticky top-0 z-50  dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm bg-[#f4f4f5]">
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
 
         {/* Tanggal — kiri */}
-        <span className="hidden sm:block text-xs text-gray-400 dark:text-gray-500 shrink-0">
-          {today}
-        </span>
+        <div className="hidden sm:flex flex-col shrink-0">
+          <span className="text-xs text-gray-400 dark:text-gray-500">{today}</span>
+          <span className="text-[10px] text-gray-400 dark:text-gray-500 leading-tight">{islamic}</span>
+        </div>
 
         {/* Spacer biar logo tetap di tengah */}
         <div className="flex-1" />
