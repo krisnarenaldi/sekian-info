@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
   },
 
   // Ensure server-only code is not bundled for client
-  serverExternalPackages: ["rss-parser"],
+  serverExternalPackages: ["rss-parser", "openai"],
 };
 
 export default nextConfig;

@@ -1,5 +1,5 @@
 /**
- * LLM Summarizer — Gemini 2.5 Flash wrapper untuk semua pipeline digest.
+ * LLM Summarizer — LiteLLM (OpenAI-compatible) wrapper untuk semua pipeline digest.
  *
  * Exported functions:
  *   - summarizeNews(clusters: ScoredCluster[])        → NewsDigestItem[]
@@ -73,22 +73,34 @@ export interface MarketData {
 }
 
 // ---------------------------------------------------------------------------
-// LiteLLM client setup (OpenAI-compatible)
+// Lazy-initialized LiteLLM client
 // ---------------------------------------------------------------------------
 
-const client = new OpenAI({
-  apiKey: process.env.LLMLITE_KEY!,
-  baseURL: 'http://litellm.koboi2026.biz.id/v1',
-})
-
 const LLM_MODEL = 'gpt-3.5-turbo'
+
+/**
+ * Mendapatkan instance OpenAI client secara lazy.
+ * Inisialisasi ditunda sampai benar-benar dibutuhkan (runtime, bukan saat build)
+ * agar environment variable LLMLITE_KEY tidak diperlukan saat build.
+ */
+let _client: OpenAI | null = null
+
+function getClient(): OpenAI {
+  if (!_client) {
+    _client = new OpenAI({
+      apiKey: process.env.LLMLITE_KEY!,
+      baseURL: 'http://litellm.koboi2026.biz.id/v1',
+    })
+  }
+  return _client
+}
 
 /**
  * Thin wrapper so call-sites stay identical — sends a single user message
  * and returns the response text.
  */
 async function generateContent(prompt: string): Promise<string> {
-  const completion = await client.chat.completions.create({
+  const completion = await getClient().chat.completions.create({
     model: LLM_MODEL,
     messages: [{ role: 'user', content: prompt }],
   })
