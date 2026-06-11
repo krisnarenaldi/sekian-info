@@ -29,8 +29,7 @@ export default function Header() {
 
         {/* Tanggal — kiri */}
         <div className="hidden sm:flex flex-col shrink-0">
-          <span className="text-xs text-gray-400 dark:text-gray-500">{today}</span>
-          <span className="text-[10px] text-gray-400 dark:text-gray-500 leading-tight">{islamic}</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500">{today} / {islamic}</span>          
         </div>
 
         {/* Spacer biar logo tetap di tengah */}
