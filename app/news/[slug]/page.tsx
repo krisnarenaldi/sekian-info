@@ -14,6 +14,7 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
 import { validateSlug } from '@/lib/utils/slug'
 import { getDailyDigestBySlug } from '@/lib/supabase/queries/daily-digest'
 import Header from '../../components/layout/Header'
@@ -67,15 +68,15 @@ function ArticleLoadingFallback() {
 
 async function ArticleDetail({ slug }: { slug: string }) {
   // Call /api/news/[slug] — handles cache check & on-demand generation
-  // Use RELATIVE URL so Next.js routes the request internally without
-  // making an external HTTP request. This is critical on Vercel where
-  // self-referencing external fetches can timeout or fail due to cold
-  // starts / SSL negotiation overhead. Relative URL keeps the request
-  // inside the same serverless process.
   let data: ArticleData
 
   try {
-    const res = await fetch(`/api/news/${encodeURIComponent(slug)}`, {
+    const headersList = await headers()
+    const host = headersList.get('host') || 'localhost:3000'
+    const protocol = headersList.get('x-forwarded-proto') || 'http'
+    const baseUrl = `${protocol}://${host}`
+
+    const res = await fetch(`${baseUrl}/api/news/${encodeURIComponent(slug)}`, {
       // No cache — always fetch fresh so on-demand generation always runs
       cache: 'no-store',
     })
