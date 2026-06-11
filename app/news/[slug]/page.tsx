@@ -66,15 +66,15 @@ function ArticleLoadingFallback() {
 
 async function ArticleDetail({ slug }: { slug: string }) {
   // Call /api/news/[slug] — handles cache check & on-demand generation
-  // Use absolute URL for server-side fetch in Next.js App Router
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL ??
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
-
+  // Use RELATIVE URL so Next.js routes the request internally without
+  // making an external HTTP request. This is critical on Vercel where
+  // self-referencing external fetches can timeout or fail due to cold
+  // starts / SSL negotiation overhead. Relative URL keeps the request
+  // inside the same serverless process.
   let data: ArticleData
 
   try {
-    const res = await fetch(`${baseUrl}/api/news/${encodeURIComponent(slug)}`, {
+    const res = await fetch(`/api/news/${encodeURIComponent(slug)}`, {
       // No cache — always fetch fresh so on-demand generation always runs
       cache: 'no-store',
     })
