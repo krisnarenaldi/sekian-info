@@ -29,13 +29,13 @@ function StockRow({ stock }: { stock: StockItem }) {
 }
 
 export default function PasarHariIniCard({ marketData }: Props) {
-  const ihsg      = marketData?.ihsg ?? null
-  const change    = marketData?.ihsg_change ?? null
-  const usdIdr    = marketData?.usd_idr ?? null
-  const gold      = marketData?.gold_price ?? null
-  const gainer    = marketData?.top_gainer ?? null
-  const loser     = marketData?.top_loser ?? null
-  const insight   = marketData?.ai_insight ?? null
+  const ihsg = marketData?.ihsg ?? null
+  const change = marketData?.ihsg_change ?? null
+  const usdIdr = marketData?.usd_idr ?? null
+  const gold = marketData?.gold_price ?? null
+  const gainer = marketData?.top_gainer ?? null
+  const loser = marketData?.top_loser ?? null
+  const insight = marketData?.ai_insight ?? null
 
   const pos = change !== null && change > 0
   const neg = change !== null && change < 0
@@ -113,7 +113,7 @@ export default function PasarHariIniCard({ marketData }: Props) {
         {/* AI Insight */}
         {insight && (
           <div className="p-3 bg-gray-50 dark:bg-gray-700/40 rounded-lg border-l-2 border-blue-400">
-            <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">AI Insight</p>
+            <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">Insight</p>
             <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed italic">
               {truncate2(insight)}
             </p>

@@ -91,6 +91,11 @@ export async function POST(req: Request): Promise<NextResponse> {
       ai_insight: aiInsight,
     })
     log.info('Market data saved to DB successfully')
+    
+    // Invalidate Next.js cache so the new data & insight display immediately
+    const { revalidateTag } = await import('next/cache')
+    revalidateTag('market-data', 'max')
+    log.info('Market data cache tag invalidated')
   } catch (err) {
     log.error('Failed to upsert market data to DB', err)
     return NextResponse.json(
