@@ -71,6 +71,9 @@ export const SPORT_NEWS_SOURCES: RSSSource[] = [
   { name: 'Detik Sport', url: 'https://sport.detik.com/rss' },
   { name: 'Antara Sport', url: 'https://www.antaranews.com/rss/olahraga' },
   { name: 'Okezone Sport', url: 'https://sindikasi.okezone.com/index.php/rss/14/RSS2.0' },
+  { name: 'CNN Sport', url: 'https://www.cnnindonesia.com/olahraga/rss'},
+  { name: 'Liputan6 Bola', url: 'https://feed.liputan6.com/rss/bola'},
+  
 ]
 
 /**
