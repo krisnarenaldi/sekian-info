@@ -50,6 +50,8 @@ export const NEWS_SOURCES: RSSSource[] = [
   { name: 'Tirto', url: 'https://tirto.id/sitemap/r/google-discover' },
   { name: 'Republika', url: 'https://www.republika.co.id/rss' },
   { name: 'CNBC', url: 'https://www.cnbcindonesia.com/rss' },
+  { name: 'Sindonews', url: 'https://www.sindonews.com/feed' },
+  { name: 'Inilah.com', url: 'https://www.inilah.com/rss.xml' },
 ]
 
 /**
@@ -72,8 +74,7 @@ export const SPORT_NEWS_SOURCES: RSSSource[] = [
   { name: 'Antara Sport', url: 'https://www.antaranews.com/rss/olahraga' },
   { name: 'Okezone Sport', url: 'https://sindikasi.okezone.com/index.php/rss/14/RSS2.0' },
   { name: 'CNN Sport', url: 'https://www.cnnindonesia.com/olahraga/rss'},
-  { name: 'Liputan6 Bola', url: 'https://feed.liputan6.com/rss/bola'},
-  
+  { name: 'Liputan6 Bola', url: 'https://feed.liputan6.com/rss/bola'},  
 ]
 
 /**
