@@ -111,8 +111,8 @@ export default async function NewsPage({ searchParams }: Props) {
             {items.map((item) => {
               const sources: string[] =
                 Array.isArray(item.raw_json?.cluster_sources) &&
-                (item.raw_json.cluster_sources as string[]).length > 0
-                  ? (item.raw_json.cluster_sources as string[])
+                (item.raw_json.cluster_sources as { name: string; url: string }[]).length > 0
+                  ? (item.raw_json.cluster_sources as { name: string; url: string }[]).map((s) => s.name)
                   : item.source
                     ? [item.source]
                     : []
