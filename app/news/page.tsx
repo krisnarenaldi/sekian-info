@@ -71,10 +71,10 @@ export default async function NewsPage({ searchParams }: Props) {
   })
 
   const headerMap: Record<string, { emoji: string; label: string }> = {
-    indonesia: { emoji: '🇮🇩', label: 'Berita Indonesia' },
-    sport: { emoji: '⚽', label: 'Berita Olahraga' },
-    international: { emoji: '🌍', label: 'Berita Internasional' },
-    market: { emoji: '💼', label: 'Berita Pasar/Investasi' },
+    indonesia: { emoji: '🇮🇩', label: 'Indonesia Info' },
+    sport: { emoji: '⚽', label: 'Sport Info' },
+    international: { emoji: '🌍', label: 'Internasional Info' },
+    market: { emoji: '💼', label: 'Investasi Info' },
   }
 
   const header = headerMap[feedType] ?? headerMap.indonesia
