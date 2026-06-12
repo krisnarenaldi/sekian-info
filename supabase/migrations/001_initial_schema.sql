@@ -15,6 +15,7 @@ CREATE TABLE daily_digest (
   source_url  TEXT NOT NULL,
   category    TEXT,
   raw_json    JSONB,
+  feed_type   TEXT NOT NULL DEFAULT 'indonesia'
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE(date, slug)
 );

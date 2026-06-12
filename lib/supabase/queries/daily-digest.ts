@@ -98,9 +98,25 @@ export async function upsertDailyDigest(
     return { success: true, count: 0 }
   }
 
+  // ── Deduplicate slugs ─────────────────────────────────────────────────────
+  // Different titles can produce the same slug after slugify() stripping, which
+  // causes PostgreSQL's ON CONFLICT DO UPDATE to fail with:
+  //   "ON CONFLICT DO UPDATE command cannot affect row a second time"
+  // We append "-2", "-3", etc. to duplicate slugs to avoid this.
+  const slugCount = new Map<string, number>()
+  const itemsWithDedupedSlugs = items.map((item) => {
+    const baseSlug = item.slug
+    const count = slugCount.get(baseSlug) ?? 0
+    slugCount.set(baseSlug, count + 1)
+    if (count > 0) {
+      return { ...item, slug: `${baseSlug}-${count + 1}` }
+    }
+    return item
+  })
+
   const supabase = createServerClient()
 
-  const rows = items.map((item) => ({
+  const rows = itemsWithDedupedSlugs.map((item) => ({
     date,
     title: item.title,
     summary: item.summary,

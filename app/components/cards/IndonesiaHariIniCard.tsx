@@ -23,7 +23,7 @@ export default function IndonesiaHariIniCard({ digestItems }: Props) {
     return <ErrorCard />
   }
 
-  const displayItems = digestItems.slice(0, 5)
+  const displayItems = digestItems.slice(0, 7)
 
   return (
     <section

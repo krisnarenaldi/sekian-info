@@ -99,7 +99,7 @@ export default function InternationalHariIniCard({ digestItems }: Props) {
     return <ErrorCard />
   }
 
-  const displayItems = digestItems.slice(0, 5)
+  const displayItems = digestItems.slice(0, 7)
   const badgeClass = 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
 
   return (

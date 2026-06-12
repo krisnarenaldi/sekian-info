@@ -128,7 +128,7 @@ export default function SportHariIniCard({ digestItems }: Props) {
     return <ErrorCard />
   }
 
-  const displayItems = digestItems.slice(0, 5)
+  const displayItems = digestItems.slice(0, 7)
   const categoryColor: Record<string, string> = {
     'Sepak Bola': 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
     'Bulutangkis': 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',

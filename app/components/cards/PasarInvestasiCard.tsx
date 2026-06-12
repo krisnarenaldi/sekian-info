@@ -99,7 +99,7 @@ export default function PasarInvestasiCard({ digestItems }: Props) {
     return <ErrorCard />
   }
 
-  const displayItems = digestItems.slice(0, 5)
+  const displayItems = digestItems.slice(0, 7)
   const badgeClass = 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
 
   return (
