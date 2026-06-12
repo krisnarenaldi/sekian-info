@@ -96,6 +96,7 @@ export const MARKET_NEWS_SOURCES: RSSSource[] = [
   { name: 'CNBC Market', url: 'https://www.cnbcindonesia.com/market/rss' },
   { name: 'Okezone Economy', url: 'https://economy.okezone.com/rss' },
   { name: 'Republika Ekonomi', url: 'https://www.republika.co.id/rss/ekonomi' },
+  { name: 'Detik Finance', url: 'https://finance.detik.com/rss' },
 ]
 
 // ---------------------------------------------------------------------------
