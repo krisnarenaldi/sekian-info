@@ -46,6 +46,10 @@ export const NEWS_SOURCES: RSSSource[] = [
   { name: 'Kumparan', url: 'https://lapi.kumparan.com/v2.0/rss' },
   { name: 'Media Indonesia', url: 'https://mediaindonesia.com/feed/all' },
   { name: 'Viva', url: 'https://www.viva.co.id/get/all' },
+  { name: 'Liputan 6', url: 'https://feed.liputan6.com/rss/news' },
+  { name: 'Tirto', url: 'https://tirto.id/sitemap/r/google-discover' },
+  { name: 'Republika', url: 'https://www.republika.co.id/rss' },
+  { name: 'CNBC', url: 'https://www.cnbcindonesia.com/rss' },
 ]
 
 /**
