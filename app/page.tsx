@@ -64,13 +64,13 @@ export default async function Home() {
         <MasonryGrid>
           
           <IndonesiaHariIniCard digestItems={digestData} />  
-          <PasarEmasCard historyData={marketHistory} />    
-          <SingleNewsCard title="Teknologi"
-                        rssUrl="https://www.cnnindonesia.com/teknologi/rss" 
-          />    
+          <PasarEmasCard historyData={marketHistory} />                  
           <SportHariIniCard digestItems={sportData} />
           <PasarUSDIDRCard historyData={marketHistory} />
           <InternationalHariIniCard digestItems={intlData} />
+          <SingleNewsCard title="Teknologi"
+                        rssUrl="https://www.cnnindonesia.com/teknologi/rss" 
+          />
           <PasarInvestasiCard digestItems={marketNewsData} />
           <SingleNewsCard title="Investasi"
                         rssUrl="https://www.cnbcindonesia.com/market/rss" 
