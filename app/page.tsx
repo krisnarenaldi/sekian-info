@@ -64,7 +64,10 @@ export default async function Home() {
         <MasonryGrid>
           
           <IndonesiaHariIniCard digestItems={digestData} />  
-          <PasarEmasCard historyData={marketHistory} />                  
+          <PasarEmasCard historyData={marketHistory} />    
+          <SingleNewsCard title="Olah Raga"
+                        rssUrl="https://sport.detik.com/rss" 
+          />              
           <SportHariIniCard digestItems={sportData} />
           <PasarUSDIDRCard historyData={marketHistory} />
           <InternationalHariIniCard digestItems={intlData} />
@@ -75,11 +78,7 @@ export default async function Home() {
           <SingleNewsCard title="Investasi"
                         rssUrl="https://www.cnbcindonesia.com/market/rss" 
           />
-          <PasarHariIniCard marketData={marketData} historyData={marketHistory} />          
-          
-          <SingleNewsCard title="Olah Raga"
-                        rssUrl="https://sport.detik.com/rss" 
-          />
+          <PasarHariIniCard marketData={marketData} historyData={marketHistory} />                    
           {/*<AIHariIniCard aiNews={aiNewsData} /> */}
           <TrendingCard trendingData={trendingData} />          
           {/*<InspirasiCard
