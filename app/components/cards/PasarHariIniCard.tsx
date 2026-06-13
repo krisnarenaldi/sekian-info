@@ -1,7 +1,10 @@
-import type { MarketDataRow, StockItem } from '@/lib/supabase/queries/market-data'
+import type { MarketDataRow } from '@/lib/supabase/queries/market-data'
+import SparkAreaChart from '../shared/SparkAreaChart'
 
 type Props = {
   marketData: MarketDataRow | null
+  /** Historical data for IHSG chart (7 days) */
+  historyData?: MarketDataRow[]
 }
 
 function fmt(value: number | null | undefined): string {
@@ -15,7 +18,7 @@ function truncate2(text: string): string {
   return m.slice(0, 2).join('').trim()
 }
 
-function StockRow({ stock }: { stock: StockItem }) {
+function StockRow({ stock }: { stock: { code: string; name: string; change_pct: number } }) {
   const pos = stock.change_pct > 0
   return (
     <li className="flex items-center justify-between text-xs gap-2">
@@ -28,17 +31,20 @@ function StockRow({ stock }: { stock: StockItem }) {
   )
 }
 
-export default function PasarHariIniCard({ marketData }: Props) {
+export default function PasarHariIniCard({ marketData, historyData = [] }: Props) {
   const ihsg = marketData?.ihsg ?? null
   const change = marketData?.ihsg_change ?? null
-  const usdIdr = marketData?.usd_idr ?? null
-  const gold = marketData?.gold_price ?? null
   const gainer = marketData?.top_gainer ?? null
   const loser = marketData?.top_loser ?? null
   const insight = marketData?.ai_insight ?? null
 
   const pos = change !== null && change > 0
   const neg = change !== null && change < 0
+
+  // Build IHSG sparkline data points (last 7 days)
+  const chartData = historyData
+    .filter((d) => d.ihsg !== null)
+    .map((d) => ({ date: d.date, value: d.ihsg! }))
 
   return (
     <section
@@ -54,33 +60,28 @@ export default function PasarHariIniCard({ marketData }: Props) {
       </div>
 
       <div className="p-5 space-y-4">
-        {/* Key metrics */}
-        <div className="grid grid-cols-3 gap-3">
-          {/* IHSG */}
-          <div className="col-span-1 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium">IHSG</p>
-            <p className="text-base font-bold text-gray-900 dark:text-white mt-0.5">{fmt(ihsg)}</p>
-            {change !== null ? (
-              <p className={`text-xs font-semibold mt-0.5 ${pos ? 'text-green-600 dark:text-green-400' : neg ? 'text-red-500 dark:text-red-400' : 'text-gray-400'}`}>
-                {pos ? '+' : ''}{change.toFixed(2)}%
-              </p>
-            ) : <p className="text-xs text-gray-400 mt-0.5">-</p>}
-          </div>
-
-          {/* USD/IDR */}
-          <div className="col-span-1 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium">USD/IDR</p>
-            <p className="text-sm font-bold text-gray-900 dark:text-white mt-0.5 leading-tight">
-              {usdIdr !== null ? `Rp ${fmt(usdIdr)}` : '-'}
-            </p>
-          </div>
-
-          {/* Emas */}
-          <div className="col-span-1 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium">Emas</p>
-            <p className="text-sm font-bold text-gray-900 dark:text-white mt-0.5 leading-tight">
-              {gold !== null ? `Rp ${fmt(gold)}` : '-'}
-            </p>
+        {/* IHSG — single big card with chart */}
+        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium">IHSG</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white mt-0.5">{fmt(ihsg)}</p>
+              {change !== null ? (
+                <p className={`text-xs font-semibold mt-0.5 ${pos ? 'text-green-600 dark:text-green-400' : neg ? 'text-red-500 dark:text-red-400' : 'text-gray-400'}`}>
+                  {pos ? '+' : ''}{change.toFixed(2)}%
+                </p>
+              ) : <p className="text-xs text-gray-400 mt-0.5">-</p>}
+            </div>
+            {chartData.length >= 2 && (
+              <SparkAreaChart
+                data={chartData}
+                lineColor={pos ? '#16a34a' : neg ? '#dc2626' : '#6b7280'}
+                fillColor={pos ? '#16a34a' : neg ? '#dc2626' : '#6b7280'}
+                height={48}
+                width={140}
+                decimals={0}
+              />
+            )}
           </div>
         </div>
 

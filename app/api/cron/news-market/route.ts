@@ -109,7 +109,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       category: item.category ?? null,
       cluster_name: item.title,
       raw_json: {
-        cluster_sources: top5[i]?.articles?.map(a => ({ name: a.source, url: a.link })) ?? [],
+        cluster_sources: top5[i]?.articles?.map(a => ({ name: a.source, url: a.link, title: a.title })) ?? [],
         image: top5[i]?.articles?.[0]?.image ?? null,
       },
     }))

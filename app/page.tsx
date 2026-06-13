@@ -6,6 +6,8 @@ import SportHariIniCard from './components/cards/SportHariIniCard'
 import InternationalHariIniCard from './components/cards/InternationalHariIniCard'
 import PasarInvestasiCard from './components/cards/PasarInvestasiCard'
 import PasarHariIniCard from './components/cards/PasarHariIniCard'
+import PasarUSDIDRCard from './components/cards/PasarUSDIDRCard'
+import PasarEmasCard from './components/cards/PasarEmasCard'
 // import AIHariIniCard from './components/cards/AIHariIniCard'
 import SingleNewsCard from './components/cards/SingleNewsCard'
 import TrendingCard from './components/cards/TrendingCard'
@@ -19,13 +21,16 @@ import { fetchDailyDigest } from '@/lib/fetchers/fetchDailyDigest'
 import { fetchSportNews } from '@/lib/fetchers/fetchSportNews'
 import { fetchMarketNews } from '@/lib/fetchers/fetchMarketNews'
 import { fetchMarketData } from '@/lib/fetchers/fetchMarketData'
+import { fetchMarketDataHistory, getDateRange } from '@/lib/fetchers/fetchMarketDataHistory'
 import { fetchAINews } from '@/lib/fetchers/fetchAINews'
 import { fetchInspirasi } from '@/lib/fetchers/fetchInspirasi'
 import { fetchTrending } from '@/lib/fetchers/fetchTrending'
 import { fetchInternationalNews } from '@/lib/fetchers/fetchInternationalNews'
 
 export default async function Home() {
-  const [digestRes, sportRes, intlRes, marketRes, marketNewsRes, aiRes, inspirasiRes, trendingRes] = await Promise.allSettled([
+  const { startDate, endDate } = getDateRange(30)
+
+  const [digestRes, sportRes, intlRes, marketRes, marketNewsRes, aiRes, inspirasiRes, trendingRes, historyRes] = await Promise.allSettled([
     fetchDailyDigest(),
     fetchSportNews(),
     fetchInternationalNews(),
@@ -34,12 +39,14 @@ export default async function Home() {
     fetchAINews(),
     fetchInspirasi(),
     fetchTrending(),
+    fetchMarketDataHistory(startDate, endDate),
   ])
 
   const digestData     = digestRes.status     === 'fulfilled' ? digestRes.value     : null
   const sportData      = sportRes.status      === 'fulfilled' ? sportRes.value      : null
   const intlData       = intlRes.status       === 'fulfilled' ? intlRes.value       : null
   const marketData     = marketRes.status     === 'fulfilled' ? marketRes.value     : null
+  const marketHistory  = historyRes.status    === 'fulfilled' ? historyRes.value    : []
   const marketNewsData = marketNewsRes.status === 'fulfilled' ? marketNewsRes.value : null
   const aiNewsData     = aiRes.status         === 'fulfilled' ? aiRes.value         : null
   const trendingData   = trendingRes.status   === 'fulfilled' ? trendingRes.value   : null
@@ -56,15 +63,20 @@ export default async function Home() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-2 py-4">
         <MasonryGrid>
           
-          <IndonesiaHariIniCard digestItems={digestData} />          
+          <IndonesiaHariIniCard digestItems={digestData} />  
+          <PasarEmasCard historyData={marketHistory} />    
+          <SingleNewsCard title="Teknologi"
+                        rssUrl="https://www.cnnindonesia.com/teknologi/rss" 
+          />    
           <SportHariIniCard digestItems={sportData} />
-          
+          <PasarUSDIDRCard historyData={marketHistory} />
           <InternationalHariIniCard digestItems={intlData} />
           <PasarInvestasiCard digestItems={marketNewsData} />
           <SingleNewsCard title="Investasi"
                         rssUrl="https://www.cnbcindonesia.com/market/rss" 
           />
-          <PasarHariIniCard marketData={marketData} />
+          <PasarHariIniCard marketData={marketData} historyData={marketHistory} />          
+          
           <SingleNewsCard title="Olah Raga"
                         rssUrl="https://sport.detik.com/rss" 
           />

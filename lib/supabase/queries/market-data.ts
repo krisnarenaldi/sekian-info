@@ -3,6 +3,7 @@
  *
  * Functions:
  * - `getMarketData(date)` — fetch market data for a specific date
+ * - `getMarketDataRange(startDate, endDate)` — fetch market data for a date range
  * - `upsertMarketData(date, data)` — upsert market data for a given date
  * - `getLatestMarketData()` — fetch the most recent market data row
  *
@@ -65,6 +66,35 @@ export async function getMarketData(date: string): Promise<MarketDataRow | null>
   }
 
   return data as MarketDataRow | null
+}
+
+/**
+ * Fetch market data for a date range (inclusive), ordered by date ascending.
+ * Returns an empty array if no rows exist in the range.
+ *
+ * @param startDate - ISO date string (inclusive, e.g. "2026-05-14")
+ * @param endDate   - ISO date string (inclusive, e.g. "2026-06-13")
+ */
+export async function getMarketDataRange(
+  startDate: string,
+  endDate: string
+): Promise<MarketDataRow[]> {
+  const supabase = createServerClient()
+
+  const { data, error } = await supabase
+    .from('market_data')
+    .select('*')
+    .gte('date', startDate)
+    .lte('date', endDate)
+    .order('date', { ascending: true })
+
+  if (error) {
+    throw new Error(
+      `getMarketDataRange failed for "${startDate}".."${endDate}": ${error.message}`
+    )
+  }
+
+  return (data ?? []) as MarketDataRow[]
 }
 
 /**

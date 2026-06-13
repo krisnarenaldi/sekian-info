@@ -28,6 +28,7 @@ const log = createLogger('api-news-slug')
 interface ClusterSourceEntry {
   name: string
   url: string
+  title?: string
 }
 
 /**
@@ -69,6 +70,57 @@ async function fetchClusterSources(slug: string): Promise<ClusterSourceEntry[]> 
   return []
 }
 
+/**
+ * Lightweight fetch of the <title> tag from a URL.
+ * Used to fill in missing article titles for display in "Sumber Terkait".
+ * Non-fatal — returns undefined on any error.
+ */
+async function fetchPageTitle(url: string): Promise<string | undefined> {
+  const TIMEOUT_MS = 4_000
+  try {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
+
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SekianInfo/1.0)' },
+    })
+    clearTimeout(timer)
+
+    if (!res.ok) return undefined
+
+    const html = await res.text()
+    // Basic regex extraction — enough for a <title> tag
+    const match = html.match(/<title[^>]*>([^<]+)<\/title>/i)
+    if (match) {
+      return match[1].trim().slice(0, 200)
+    }
+    return undefined
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * For cluster sources missing a title, try to fetch it from the URL.
+ * Fetches are done sequentially with a 4s timeout each to avoid hammering.
+ * Non-fatal — sources that fail keep their existing data.
+ */
+async function enrichMissingTitles(sources: ClusterSourceEntry[]): Promise<ClusterSourceEntry[]> {
+  const enriched: ClusterSourceEntry[] = []
+  for (const source of sources) {
+    if (source.title) {
+      enriched.push(source)
+    } else if (source.url) {
+      const title = await fetchPageTitle(source.url)
+      enriched.push({ ...source, title })
+    } else {
+      enriched.push(source)
+    }
+  }
+  return enriched
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
@@ -88,7 +140,8 @@ export async function GET(
     const cached = await getArticleBySlug(slug)
     if (cached) {
       log.info(`Cache hit for slug: "${slug}"`)
-      const cluster_sources = await fetchClusterSources(slug)
+      let cluster_sources = await fetchClusterSources(slug)
+      cluster_sources = await enrichMissingTitles(cluster_sources)
       return NextResponse.json({
         ...cached,
         cluster_sources,
@@ -103,7 +156,8 @@ export async function GET(
     }
 
     const { title, source_url, source: source_name } = digestItem
-    const cluster_sources = extractClusterSources(digestItem.raw_json)
+    let cluster_sources = extractClusterSources(digestItem.raw_json)
+    cluster_sources = await enrichMissingTitles(cluster_sources)
 
     log.info(`Cache miss for slug: "${slug}" — starting on-demand generation`)
 
