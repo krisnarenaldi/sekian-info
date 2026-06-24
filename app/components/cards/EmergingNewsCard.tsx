@@ -31,26 +31,37 @@ export default function EmergingNewsCard({ stories }: Props) {
 
       <div className="p-5">
         {hasStories ? (
-          <ul className="space-y-4" role="list">
-            {activeStories.slice(0, 6).map((story) => (
-              <li key={story.id} role="listitem">
-                <Link
-                  href={`/stories/${story.id}`}
-                  className="flex items-start justify-between gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded p-1 -m-1"
-                >
-                  <div className="flex-1 min-w-0">
-                    <span className="text-sm text-gray-800 dark:text-gray-100 font-medium group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug line-clamp-2">
-                      {story.title}
+          <>
+            <ul className="space-y-4" role="list">
+              {activeStories.slice(0, 6).map((story) => (
+                <li key={story.id} role="listitem">
+                  <Link
+                    href={`/stories/${story.id}`}
+                    className="flex items-start justify-between gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded p-1 -m-1"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm text-gray-800 dark:text-gray-100 font-medium group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug line-clamp-2">
+                        {story.title}
+                      </span>
+                    </div>
+                    
+                    <span className="shrink-0 text-xs px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full font-semibold">
+                      {story.actual_snapshot_count} hari
                     </span>
-                  </div>
-                  
-                  <span className="shrink-0 text-xs px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full font-semibold">
-                    {story.actual_snapshot_count} hari
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+              <Link
+                href="/stories"
+                className="text-xs text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+              >
+                Lihat semua topik →
+              </Link>
+            </div>
+          </>
         ) : (
           <p className="text-sm text-gray-400 dark:text-gray-500">
             Belum ada topik berita berkembang saat ini.

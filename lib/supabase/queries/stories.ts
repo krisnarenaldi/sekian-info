@@ -284,6 +284,66 @@ export interface EmergingStory {
   }>
 }
 
+export interface StoryListItem {
+  id: string
+  title: string
+  status: StoryStatus
+  snapshot_count: number
+  article_count: number
+  source_count: number
+  first_seen_at: string
+  last_seen_at: string
+}
+
+export interface StoriesForListingResult {
+  active: StoryListItem[]
+  resolved: StoryListItem[]
+  resolvedTotal: number
+}
+
+/**
+ * Ambil stories untuk halaman direktori /stories.
+ * - ACTIVE/NEW: semua, sort last_seen_at DESC
+ * - RESOLVED: hanya resolvedLimit terbaru, beserta total count
+ *
+ * @param resolvedLimit  Jumlah RESOLVED yang ditampilkan (default: 10)
+ */
+export async function getStoriesForListing(resolvedLimit = 10): Promise<StoriesForListingResult> {
+  const supabase = createServerClient()
+
+  const [activeRes, resolvedRes, countRes] = await Promise.all([
+    // Semua ACTIVE/NEW
+    supabase
+      .from('stories')
+      .select('id, title, status, snapshot_count, article_count, source_count, first_seen_at, last_seen_at')
+      .in('status', ['NEW', 'ACTIVE'])
+      .order('last_seen_at', { ascending: false }),
+
+    // RESOLVED — hanya resolvedLimit terbaru
+    supabase
+      .from('stories')
+      .select('id, title, status, snapshot_count, article_count, source_count, first_seen_at, last_seen_at')
+      .eq('status', 'RESOLVED')
+      .order('last_seen_at', { ascending: false })
+      .limit(resolvedLimit),
+
+    // Total count RESOLVED
+    supabase
+      .from('stories')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'RESOLVED'),
+  ])
+
+  if (activeRes.error) throw new Error(`getStoriesForListing (active) failed: ${activeRes.error.message}`)
+  if (resolvedRes.error) throw new Error(`getStoriesForListing (resolved) failed: ${resolvedRes.error.message}`)
+
+  return {
+    active: (activeRes.data ?? []) as StoryListItem[],
+    resolved: (resolvedRes.data ?? []) as StoryListItem[],
+    resolvedTotal: countRes.count ?? 0,
+  }
+}
+
 /**
  * Fetch stories with more than 1 snapshot, ordered by snapshot count DESC.
  */
