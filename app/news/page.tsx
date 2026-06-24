@@ -109,13 +109,14 @@ export default async function NewsPage({ searchParams }: Props) {
         >
           <ul className="divide-y divide-gray-50 dark:divide-gray-700/50">
             {items.map((item) => {
-              const sources: string[] =
+              const rawSources =
                 Array.isArray(item.raw_json?.cluster_sources) &&
                 (item.raw_json.cluster_sources as { name: string; url: string }[]).length > 0
                   ? (item.raw_json.cluster_sources as { name: string; url: string }[]).map((s) => s.name)
                   : item.source
                     ? [item.source]
                     : []
+              const sources = Array.from(new Set(rawSources.map((name) => name?.trim()).filter(Boolean)))
 
               return (
                 <li key={item.id}>

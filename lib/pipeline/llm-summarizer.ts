@@ -6,6 +6,9 @@
  *   - summarizeMarket(marketData: MarketData)          → string  (insight text)
  *   - summarizeAINews(newsItems: NormalizedItem[])     → AINewsItem[]
  *   - summarizeArticle(content, title)                 → ArticleSummary
+ *   - nameCluster(cluster: ScoredCluster)              → string  (cluster topic name)
+ *   - summarizeStorySnapshot(input)                    → string  (daily development summary)
+ *   - generateClusterMetadata(articles)                → ClusterMetadata (name, summary, entities, keywords)
  *
  * Semua fungsi parse output JSON dan melempar error jika respons bukan JSON valid.
  * Setiap pemanggilan LLM yang gagal dicatat via structured logger.
@@ -72,6 +75,28 @@ export interface MarketData {
   top_loser?: Array<{ code: string; name: string; change_pct: number }> | null
 }
 
+/**
+ * Output from generateClusterMetadata — satu panggilan LLM yang menghasilkan
+ * nama cluster, ringkasan, entities, dan keywords sekaligus.
+ * Mencerminkan prompt Python script yang lama.
+ */
+export interface ClusterMetadata {
+  cluster_name: string
+  summary: string
+  entities: string[]
+  keywords: string[]
+}
+
+/**
+ * Input untuk summarizeStorySnapshot
+ */
+export interface StorySnapshotInput {
+  clusterName: string
+  articleCount: number
+  sourceCount: number
+  date: string  // YYYY-MM-DD
+}
+
 // ---------------------------------------------------------------------------
 // Lazy-initialized LiteLLM client
 // ---------------------------------------------------------------------------
@@ -102,7 +127,13 @@ function getClient(): OpenAI {
 async function generateContent(prompt: string): Promise<string> {
   const completion = await getClient().chat.completions.create({
     model: LLM_MODEL,
-    messages: [{ role: 'user', content: prompt }],
+    messages: [
+      {
+        role: 'system',
+        content: 'Kamu adalah editor berita senior dengan pengalaman 2 dekade untuk masyarakat Indonesia. Ahli dalam buat ringkasan berita / artikel secara padat dan jelas.',
+      },
+      { role: 'user', content: prompt },
+    ],
   })
   return completion.choices[0]?.message?.content ?? ''
 }
@@ -411,5 +442,101 @@ Output HANYA JSON, tanpa penjelasan tambahan.`
   } catch (err) {
     log.error('LLM call failed in summarizeArticle', err)
     throw err
+  }
+}
+
+/**
+ * Hasilkan ringkasan perkembangan harian sebuah story (maks 2 kalimat Bahasa Indonesia).
+ *
+ * Digunakan oleh Story_Snapshot_Writer — dipanggil maks 1x per story per hari.
+ * Melempar error jika LLM gagal agar caller bisa menangani (simpan summary = NULL).
+ *
+ * Requirements: 3.2, 5.1, 5.4
+ */
+export async function summarizeStorySnapshot(
+  input: StorySnapshotInput,
+): Promise<string> {
+  const prompt = `Kamu adalah editor berita yang merangkum perkembangan sebuah topik berita.
+
+Topik: ${input.clusterName}
+Tanggal: ${input.date}
+Jumlah artikel hari ini: ${input.articleCount}
+Jumlah media yang meliput: ${input.sourceCount}
+
+Buat ringkasan perkembangan topik ini hari ini dalam maksimal 2 kalimat Bahasa Indonesia.
+Fokus pada apa yang terjadi hari ini, bukan latar belakang topik secara umum.
+
+Output HANYA teks ringkasan, tanpa judul atau label.`
+
+  try {
+    const text = await withRetry(() => generateContent(prompt), 'summarizeStorySnapshot')
+    return text.trim()
+  } catch (err) {
+    log.error('LLM call failed in summarizeStorySnapshot', err)
+    throw err
+  }
+}
+
+/**
+ * Generate cluster metadata — satu panggilan LLM yang menghasilkan nama cluster,
+ * ringkasan, entities, dan keywords sekaligus.
+ *
+ * Mencerminkan prompt dari Python script yang lama:
+ * - cluster_name: maksimal 8 kata
+ * - summary: maksimal 2 kalimat
+ * - entities: nama orang, organisasi, lokasi, institusi, perusahaan
+ * - keywords: topik utama berita
+ *
+ * @param articles - Daftar artikel (minimal title, opsional description)
+ * @returns ClusterMetadata terstruktur
+ *
+ * Digunakan oleh Story Tracker untuk:
+ *   - Nama cluster baru (create story)
+ *   - Ringkasan snapshot harian (summary)
+ *   - Entities & keywords untuk story_snapshots
+ */
+export async function generateClusterMetadata(
+  articles: Array<{ title: string; description?: string }>,
+): Promise<ClusterMetadata> {
+  // Format daftar artikel untuk prompt — konsisten dengan Python script
+  const articleList = articles
+    .map((a) => {
+      const desc = a.description ? ` ${a.description}` : ''
+      return `- ${a.title}${desc}`
+    })
+    .join('\n')
+
+  const prompt = `Berikut kumpulan artikel:
+
+${articleList}
+
+Buat JSON:
+{
+  "cluster_name": "",
+  "summary": "",
+  "entities": [],
+  "keywords": []
+}
+
+Aturan:
+- cluster_name maksimal 8 kata
+- summary maksimal 2 kalimat
+- entities berisi nama orang, organisasi, lokasi, institusi, perusahaan
+- keywords berisi topik utama berita
+
+Output HANYA JSON, tanpa penjelasan tambahan.`
+
+  try {
+    const text = await withRetry(() => generateContent(prompt), 'generateClusterMetadata')
+    return parseJSON<ClusterMetadata>(text)
+  } catch (err) {
+    log.error('LLM call failed in generateClusterMetadata', err)
+    // Fallback sederhana jika LLM gagal
+    return {
+      cluster_name: articles[0]?.title?.slice(0, 60) ?? 'Topik berita',
+      summary: '',
+      entities: [],
+      keywords: [],
+    }
   }
 }

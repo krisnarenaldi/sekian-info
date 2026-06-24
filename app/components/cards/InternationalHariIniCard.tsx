@@ -11,11 +11,12 @@ function extractSources(raw: Record<string, unknown> | null | undefined): string
   if (!raw) return []
   const cs = raw.cluster_sources
   if (!Array.isArray(cs) || cs.length === 0) return []
-  return cs.map((s) => {
+  const mapped = cs.map((s) => {
     if (typeof s === 'string') return s
     if (s && typeof s === 'object' && 'name' in s) return String((s as Record<string, unknown>).name)
     return String(s)
   })
+  return Array.from(new Set(mapped.map((src) => src.trim()).filter(Boolean)))
 }
 
 function renderListItem(item: DailyDigestRow, badgeClass: string) {

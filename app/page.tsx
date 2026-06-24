@@ -16,6 +16,7 @@ import JadwalSholatCard from './components/cards/JadwalSholatCard'
 import TanggalMerahCard from './components/cards/TanggalMerahCard'
 import SaweriaCard from './components/cards/SaweriaCard'
 import AboutCard from './components/cards/AboutCard'
+import EmergingNewsCard from './components/cards/EmergingNewsCard'
 // import AnimeCard from './components/cards/AnimeCard'
 import { fetchDailyDigest } from '@/lib/fetchers/fetchDailyDigest'
 import { fetchSportNews } from '@/lib/fetchers/fetchSportNews'
@@ -26,11 +27,12 @@ import { fetchAINews } from '@/lib/fetchers/fetchAINews'
 import { fetchInspirasi } from '@/lib/fetchers/fetchInspirasi'
 import { fetchTrending } from '@/lib/fetchers/fetchTrending'
 import { fetchInternationalNews } from '@/lib/fetchers/fetchInternationalNews'
+import { fetchEmergingStories } from '@/lib/fetchers/fetchEmergingStories'
 
 export default async function Home() {
   const { startDate, endDate } = getDateRange(30)
 
-  const [digestRes, sportRes, intlRes, marketRes, marketNewsRes, aiRes, inspirasiRes, trendingRes, historyRes] = await Promise.allSettled([
+  const [digestRes, sportRes, intlRes, marketRes, marketNewsRes, aiRes, inspirasiRes, trendingRes, historyRes, emergingRes] = await Promise.allSettled([
     fetchDailyDigest(),
     fetchSportNews(),
     fetchInternationalNews(),
@@ -40,21 +42,23 @@ export default async function Home() {
     fetchInspirasi(),
     fetchTrending(),
     fetchMarketDataHistory(startDate, endDate),
+    fetchEmergingStories(),
   ])
 
-  const digestData     = digestRes.status     === 'fulfilled' ? digestRes.value     : null
-  const sportData      = sportRes.status      === 'fulfilled' ? sportRes.value      : null
-  const intlData       = intlRes.status       === 'fulfilled' ? intlRes.value       : null
-  const marketData     = marketRes.status     === 'fulfilled' ? marketRes.value     : null
-  const marketHistory  = historyRes.status    === 'fulfilled' ? historyRes.value    : []
+  const digestData = digestRes.status === 'fulfilled' ? digestRes.value : null
+  const sportData = sportRes.status === 'fulfilled' ? sportRes.value : null
+  const intlData = intlRes.status === 'fulfilled' ? intlRes.value : null
+  const marketData = marketRes.status === 'fulfilled' ? marketRes.value : null
+  const marketHistory = historyRes.status === 'fulfilled' ? historyRes.value : []
   const marketNewsData = marketNewsRes.status === 'fulfilled' ? marketNewsRes.value : null
-  const aiNewsData     = aiRes.status         === 'fulfilled' ? aiRes.value         : null
-  const trendingData   = trendingRes.status   === 'fulfilled' ? trendingRes.value   : null
+  const aiNewsData = aiRes.status === 'fulfilled' ? aiRes.value : null
+  const trendingData = trendingRes.status === 'fulfilled' ? trendingRes.value : null
+  const emergingData = emergingRes.status === 'fulfilled' ? emergingRes.value : null
 
   const inspirasiState =
     inspirasiRes.status === 'fulfilled'
       ? { error: false as const, data: inspirasiRes.value }
-      : { error: true as const,  data: null }
+      : { error: true as const, data: null }
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-100 dark:bg-gray-900">
@@ -62,34 +66,34 @@ export default async function Home() {
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-2 py-4">
         <MasonryGrid>
-          
-          <IndonesiaHariIniCard digestItems={digestData} />  
-          <PasarEmasCard historyData={marketHistory} />    
+          <EmergingNewsCard stories={emergingData} />
+          <IndonesiaHariIniCard digestItems={digestData} />
+          <PasarEmasCard historyData={marketHistory} />
           <SingleNewsCard title="Olah Raga"
-                        rssUrl="https://sport.detik.com/rss" 
-          />              
+            rssUrl="https://sport.detik.com/rss"
+          />
           <SportHariIniCard digestItems={sportData} />
           <PasarUSDIDRCard historyData={marketHistory} />
           <InternationalHariIniCard digestItems={intlData} />
           <SingleNewsCard title="Teknologi"
-                        rssUrl="https://www.cnnindonesia.com/teknologi/rss" 
+            rssUrl="https://www.cnnindonesia.com/teknologi/rss"
           />
           <PasarInvestasiCard digestItems={marketNewsData} />
           <SingleNewsCard title="Investasi"
-                        rssUrl="https://www.cnbcindonesia.com/market/rss" 
+            rssUrl="https://www.cnbcindonesia.com/market/rss"
           />
-          <PasarHariIniCard marketData={marketData} historyData={marketHistory} />                    
+          <PasarHariIniCard marketData={marketData} historyData={marketHistory} />
           {/*<AIHariIniCard aiNews={aiNewsData} /> */}
-          <TrendingCard trendingData={trendingData} />          
+          <TrendingCard trendingData={trendingData} />
           {/*<InspirasiCard
             inspirasi={inspirasiState.data}
             hasError={inspirasiState.error}
           />*/}
-          
+
           <TanggalMerahCard />
-          <JadwalSholatCard />          
+          <JadwalSholatCard />
           <AboutCard />
-          <SaweriaCard />          
+          <SaweriaCard />
         </MasonryGrid>
       </main>
 
