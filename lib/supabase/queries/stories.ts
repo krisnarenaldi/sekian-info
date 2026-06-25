@@ -352,10 +352,15 @@ export async function getEmergingStories(): Promise<EmergingStory[]> {
   const supabase = createServerClient()
 
   // Filter: last_seen_at dalam 5 hari terakhir
-  const fiveDaysAgo = new Date()
-  fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5)
-  const threshold = fiveDaysAgo.toISOString().split('T')[0]
+  // const fiveDaysAgo = new Date()
+  // fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5)
 
+  // const threshold = fiveDaysAgo.toISOString().split('T')[0]
+
+  const nDaysAgo = new Date()
+  nDaysAgo.setDate(nDaysAgo.getDate() - 3)
+  const threshold = nDaysAgo.toISOString().split('T')[0]
+  
   const { data, error } = await supabase
     .from('stories')
     .select(`
