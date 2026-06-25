@@ -131,28 +131,24 @@ export async function POST(req: Request): Promise<NextResponse> {
       log.warn('Health check tabel stories gagal, melanjutkan pipeline', healthErr)
     }
 
-    // ── 3. Cek daily_digest hari ini ────────────────────────────────────────
-    // Req 4.3: Baca output pipeline existing hari ini dari DB (tidak memanggil
-    //          ulang pipeline RSS/clustering).
-    // Req 4.4: Jika belum tersedia → log warning, return 200 (bukan error ke Vercel Cron).
+    // ── 3. Cek daily_digest hari ini (opsional) ─────────────────────────────
+    // Jika daily_digest belum tersedia, pipeline tetap jalan dengan cluster
+    // kosong agar stale story resolution tetap berfungsi.
+    let clusters: ClusterWithArticles[] = []
+
     const todayDigest = await getDailyDigest(today)
 
-    if (!todayDigest || todayDigest.length === 0) {
+    if (todayDigest && todayDigest.length > 0) {
+      log.info(`${todayDigest.length} item daily_digest ditemukan untuk tanggal ${today}`)
+
+      // ── 3. Konversi ke ClusterWithArticles ────────────────────────────────
+      clusters = todayDigest.map(digestRowToCluster)
+      log.info(`${clusters.length} cluster disiapkan untuk Story Tracker`)
+    } else {
       log.warn(
-        `daily_digest untuk tanggal ${today} belum tersedia — pipeline Tracked Stories dilewati`,
-      )
-      return NextResponse.json(
-        { status: 'skipped', reason: 'daily_digest_not_ready' },
-        { status: 200 },
+        `daily_digest untuk tanggal ${today} belum tersedia — pipeline tetap jalan tanpa cluster baru`,
       )
     }
-
-    log.info(`${todayDigest.length} item daily_digest ditemukan untuk tanggal ${today}`)
-
-    // ── 3. Konversi ke ClusterWithArticles ──────────────────────────────────
-    const clusters: ClusterWithArticles[] = todayDigest.map(digestRowToCluster)
-
-    log.info(`${clusters.length} cluster disiapkan untuk Story Tracker`)
 
     // ── 4. Jalankan Story Tracker ────────────────────────────────────────────
     // Req 4.3: Story Tracker menerima clusters dari pipeline existing.
