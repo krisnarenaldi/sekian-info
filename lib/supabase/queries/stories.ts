@@ -275,6 +275,7 @@ export async function getStoryById(id: string): Promise<Story | null> {
 export interface EmergingStory {
   id: string
   title: string
+  last_seen_at: string
   actual_snapshot_count: number
   snapshots: Array<{
     id: string
@@ -350,11 +351,17 @@ export async function getStoriesForListing(resolvedLimit = 10): Promise<StoriesF
 export async function getEmergingStories(): Promise<EmergingStory[]> {
   const supabase = createServerClient()
 
+  // Filter: last_seen_at dalam 5 hari terakhir
+  const fiveDaysAgo = new Date()
+  fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5)
+  const threshold = fiveDaysAgo.toISOString().split('T')[0]
+
   const { data, error } = await supabase
     .from('stories')
     .select(`
       id,
       title,
+      last_seen_at,
       story_snapshots (
         id,
         snapshot_date,
@@ -362,6 +369,7 @@ export async function getEmergingStories(): Promise<EmergingStory[]> {
         summary
       )
     `)
+    .gte('last_seen_at', threshold)
 
   if (error) {
     throw new Error(`getEmergingStories failed: ${error.message}`)
@@ -386,6 +394,7 @@ export async function getEmergingStories(): Promise<EmergingStory[]> {
       return {
         id: row.id,
         title: row.title,
+        last_seen_at: row.last_seen_at,
         actual_snapshot_count: snapshots.length,
         snapshots,
       }
