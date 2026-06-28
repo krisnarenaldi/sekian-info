@@ -101,7 +101,12 @@ export interface StorySnapshotInput {
 // Lazy-initialized LiteLLM client
 // ---------------------------------------------------------------------------
 
-const LLM_MODEL = 'gpt-3.5-turbo'
+/**
+ * Model default — gunakan Gemini via LiteLLM proxy karena
+ * gpt-3.5-turbo tidak tersedia di proxy ini.
+ * Lihat daftar model lengkap: GET /v1/models
+ */
+const LLM_MODEL = 'gemini/gemini-2.5-flash-lite'
 
 /**
  * Mendapatkan instance OpenAI client secara lazy.
@@ -145,18 +150,22 @@ const log = createLogger('llm-summarizer')
 // ---------------------------------------------------------------------------
 
 /**
- * Retry config for transient Gemini errors (503 overload, 429 rate-limit).
+ * Retry config for transient Gemini/LiteLLM errors (503 overload, 429 rate-limit).
  */
 const RETRY_MAX_ATTEMPTS = 3
 const RETRY_BASE_DELAY_MS = 2_000  // 2s → 4s → 8s
 
 /**
- * Returns true if the error looks like a transient Gemini server error
+ * Returns true if the error looks like a transient server error
  * that is worth retrying (503 Service Unavailable or 429 Too Many Requests).
+ *
+ * Handles both bracketed format `[429]` (native OpenAI) and
+ * unbracketed `429 ` (LiteLLM proxy).
  */
 function isRetryableError(err: unknown): boolean {
   if (err instanceof Error) {
-    return /\[503/.test(err.message) || /\[429/.test(err.message)
+    const msg = err.message
+    return /(?:\[)?50[33]/.test(msg) || /(?:\[)?42[9]/.test(msg)
   }
   return false
 }
@@ -316,7 +325,20 @@ Output HANYA JSON array, tanpa penjelasan tambahan.`
     })
   } catch (err) {
     log.error('LLM call failed in summarizeNews', err)
-    throw err
+    // === GRACEFUL FALLBACK ===
+    // Jika LLM gagal total, hasilkan item digest dari data cluster langsung
+    // agar pipeline tetap bisa lanjut dan menyimpan data hari ini.
+    log.warn('Falling back to cluster-data-only digest (no LLM summarization)')
+    return clusters.map((c, i) => {
+      const rep = c.articles[0]
+      return {
+        title: clusterNames[i],
+        summary: rep?.title ?? clusterNames[i],
+        category: c.primaryCategory,
+        source: rep?.source ?? '',
+        source_url: rep?.link ?? '',
+      }
+    })
   }
 }
 
